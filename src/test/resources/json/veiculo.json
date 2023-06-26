@@ -1,0 +1,8 @@
+{
+  "nome": "{{nome}}",
+  "marca": "{{marca}}",
+  "ano": "{{ano}}",
+  "descricao": "{{descricao}}",
+  "vendido": "{{vendido}}",
+  "cor": "{{cor}}"
+}

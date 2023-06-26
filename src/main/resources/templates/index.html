@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Cadastro de Veiculos</title>
+    <style>
+        h2 {
+            margin-top: 20px;
+        }
+
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Sistema de Cadastro de Veiculos</h1>
+
+<div>
+    <div>
+        <h2>Criar Veiculo</h2>
+        <form id="createForm">
+            <label for="nomeCreate">Nome:</label>
+            <input type="text" id="nomeCreate" name="nome">
+
+            <label for="marcaCreate">Marca:</label>
+            <input type="text" id="marcaCreate" name="marca">
+
+            <label for="anoCreate">Ano:</label>
+            <input type="text" id="anoCreate" name="ano">
+
+            <label for="descricaoCreate">Descricao:</label>
+            <input type="text" id="descricaoCreate" name="descricao">
+
+            <label for="vendidoCreate">Vendido:</label>
+            <input type="text" id="vendidoCreate" name="vendido">
+
+            <label for="corCreate">Cor:</label>
+            <input type="text" id="corCreate" name="cor">
+
+            <button type="submit">Criar Veiculo</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Atualizar Veiculo</h2>
+        <form id="updateForm">
+            <label for="updateIdInput">ID:</label>
+            <input type="text" id="updateIdInput" name="id">
+
+            <label for="nomeUpdate">Nome:</label>
+            <input type="text" id="nomeUpdate" name="nome">
+
+            <label for="marcaUpdate">Marca:</label>
+            <input type="text" id="marcaUpdate" name="marca">
+
+            <label for="anoUpdate">Ano:</label>
+            <input type="number" id="anoUpdate" name="ano">
+
+            <label for="descricaoUpdate">Descricao:</label>
+            <input type="text" id="descricaoUpdate" name="descricao">
+
+            <label for="vendidoUpdate">Vendido:</label>
+            <input type="text" id="vendidoUpdate" name="vendido">
+
+            <label for="corUpdate">Cor:</label>
+            <input type="text" id="corUpdate" name="cor">
+
+            <button type="submit">Atualizar Veiculo</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Excluir Veiculo</h2>
+        <form id="deleteForm">
+            <label for="deleteIdInput">ID:</label>
+            <input type="text" id="deleteIdInput" name="id">
+            <button type="submit">Excluir Veiculo</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Filtrar Veiculo</h2>
+        <form id="filterForm">
+            <label for="marcaUpdate">Marca:</label>
+            <input type="text" id="marcaInput" name="marca">
+
+            <label for="anoUpdate">Ano:</label>
+            <input type="number" id="anoInput" name="ano">
+
+            <label for="corUpdate">Cor:</label>
+            <input type="text" id="corInput" name="cor">
+
+            <button type="submit" id="filterButton">Filtrar</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Filtrar Veiculo por decada</h2>
+        <form id="decadaForm">
+            <label for="anoDecada">Ano:</label>
+            <input type="number" id="anoDecada" name="ano">
+
+            <button type="submit" id="getByDecadaButton">Obter por decada</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Veiculo foi vendido</h2>
+        <form id="vendidoForm">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id">
+
+            <label for="vendido">Vendido:</label>
+            <input type="text" id="vendido" name="vendido">
+
+            <button type="submit" id="updateVendido">Atualizar Vendido</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Lista Veiculo</h2>
+        <div>
+            <button type="button" id="getAllButton">Obter todos</button>
+            <button type="button" id="getNaoVendidosButton">Obter nao vendidos</button>
+            <button type="button" id="getUltimaSemanaButton">Obter ultima semana</button>
+        </div>
+    </div>
+</div>
+
+<div>
+    <h2>Lista Veiculo</h2>
+    <h2>--------------------------------------</h2>
+    <div id="resultContainer" style="max-height: 300px; overflow-y: auto;"></div>
+</div>
+
+
+<script src="api.js"></script>
+<script>
+    const filterForm = document.getElementById('filterForm');
+    const resultContainer = document.getElementById('resultContainer');
+
+    filterForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const marca = document.getElementById('marcaInput').value;
+        const ano = document.getElementById('anoInput').value;
+        const cor = document.getElementById('corInput').value;
+
+        getVeiculosByFilter(marca, ano, cor);
+    });
+
+    const decadaForm = document.getElementById('decadaForm');
+    decadaForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const ano = document.getElementById('anoDecada').value;
+
+        getVeiculosByDecada(ano);
+    });
+
+    const vendidoForm = document.getElementById('vendidoForm');
+    vendidoForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const id = document.getElementById('id').value;
+        const vendido = document.getElementById('vendido').value;
+
+        const requestData = {
+            vendido: vendido,
+        };
+
+        updateVeiculoStatus(id, requestData);
+    });
+
+    const getAllButton = document.getElementById('getAllButton');
+    getAllButton.addEventListener('click', function () {
+        getVeiculos();
+    });
+
+    const getNaoVendidosButton = document.getElementById('getNaoVendidosButton');
+    getNaoVendidosButton.addEventListener('click', function () {
+        getVeiculosNaoVendidos();
+    });
+
+    const getUltimaSemanaButton = document.getElementById('getUltimaSemanaButton');
+    getUltimaSemanaButton.addEventListener('click', function () {
+        getVeiculosUltimaSemana();
+    });
+
+    const getByDecadaButton = document.getElementById('getByDecadaButton');
+    getByDecadaButton.addEventListener('click', function () {
+        getVeiculosByDecada();
+    });
+
+    const createForm = document.getElementById('createForm');
+    createForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const nome = document.getElementById('nomeCreate').value;
+        const marca = document.getElementById('marcaCreate').value;
+        const ano = document.getElementById('anoCreate').value;
+        const descricao = document.getElementById('descricaoCreate').value;
+        const vendido = document.getElementById('vendidoCreate').value === 'true';
+        const cor = document.getElementById('corCreate').value;
+
+        const requestData = {
+            nome: nome,
+            marca: marca,
+            ano: ano,
+            descricao: descricao,
+            vendido: vendido,
+            cor: cor
+        };
+
+        createVeiculo(requestData);
+    });
+
+    const updateForm = document.getElementById('updateForm');
+    updateForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const id = document.getElementById('updateIdInput').value;
+        const nome = document.getElementById('nomeUpdate').value;
+        const marca = document.getElementById('marcaUpdate').value;
+        const ano = document.getElementById('anoUpdate').value;
+        const descricao = document.getElementById('descricaoUpdate').value;
+        const vendido = document.getElementById('vendidoUpdate').value === 'true';
+        const cor = document.getElementById('corUpdate').value;
+
+        const requestData = {
+            nome: nome,
+            marca: marca,
+            ano: ano,
+            descricao: descricao,
+            vendido: vendido,
+            cor: cor
+        };
+
+        updateVeiculo(id, requestData);
+    });
+
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Obter o ID do veículo a ser excluído
+        const id = document.getElementById('deleteIdInput').value;
+
+        deleteVeiculo(id);
+    });
+
+    // Função para exibir os resultados na página
+    function displayResults(results) {
+        resultContainer.innerHTML = '';
+
+        if (results.length === 0) {
+            resultContainer.innerHTML = '<p>Nenhum resultado encontrado.</p>';
+        } else {
+            for (let i = 0; i < results.length; i++) {
+                const veiculo = results[i];
+                const veiculoElement = document.createElement('div');
+                veiculoElement.innerHTML = `
+            <p>ID: ${veiculo.id}</p>
+            <p>Marca: ${veiculo.nome}</p>
+            <p>Marca: ${veiculo.marca}</p>
+            <p>Ano: ${veiculo.ano}</p>
+            <p>Ano: ${veiculo.descricao}</p>
+            <p>Ano: ${veiculo.vendido}</p>
+            <p>Cor: ${veiculo.cor}</p>
+          `;
+                resultContainer.appendChild(veiculoElement);
+            }
+        }
+    }
+</script>
+</body>
+</html>
